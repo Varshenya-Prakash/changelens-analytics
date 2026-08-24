@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Alert #{{ event.id }} — ChangeLens Analytics{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/alerts">← Alert Feed</a></div>
+
+<div class="page-header">
+  <div>
+    <h1>{{ site.name }} — {{ page.page_label }}</h1>
+    <p class="subtitle">
+      Detected {{ event.detected_at.strftime("%b %d, %Y %H:%M UTC") }} &middot;
+      <a href="{{ page.url }}" target="_blank" rel="noopener">{{ page.url }} ↗</a>
+    </p>
+  </div>
+  <div>
+    <span class="{{ event.signal_level|signal_badge_class }}" style="font-size:14px;padding:6px 14px;">{{ event.signal_level }} · {{ "%.0f"|format(event.signal_score) }}/100</span>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div>
+    <div class="card">
+      <div class="section-title">What changed</div>
+      <p>{{ event.diff_summary }}</p>
+      <div class="diff-grid">
+        <div>
+          <strong style="color:var(--color-low);">Added</strong>
+          <div class="diff-block diff-added">{{ event.added_text or "(no additions)" }}</div>
+        </div>
+        <div>
+          <strong style="color:var(--color-critical);">Removed</strong>
+          <div class="diff-block diff-removed">{{ event.removed_text or "(no removals)" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Why this was classified as "{{ event.primary_category }}"</div>
+      {% if event.category_links %}
+        <div class="table-wrap">
+<table>
+          <thead><tr><th>Category</th><th>Confidence</th><th>Matched terms</th></tr></thead>
+          <tbody>
+            {% for link in event.category_links %}
+            <tr>
+              <td>{{ link.category.name }}{% if link.category.name == event.primary_category %} <span class="pill">primary</span>{% endif %}</td>
+              <td>{{ "%.0f"|format(link.confidence * 100) }}%</td>
+              <td>{{ link.matched_terms|join(", ") }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+</div>
+      {% else %}
+        <p>No specific category keywords matched; classified as "Other" by default.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="section-title">How the signal score was calculated</div>
+      <div class="explanation-box">{{ event.scoring_explanation }}</div>
+      <p style="margin-top:10px;color:var(--color-text-muted);font-size:13px;">
+        Change magnitude: {{ "%.0f"|format(event.change_magnitude * 100) }}% of comparable text changed &middot;
+        Text similarity to previous snapshot: {{ "%.0f"|format(event.similarity_score * 100) }}% &middot;
+        Category weight for "{{ event.primary_category }}": {{ category_weight }}
+        {% if event.is_cosmetic %} &middot; <span class="badge-cosmetic">cosmetic penalty applied</span>{% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <div class="section-title">Why this matters</div>
+      <p>{{ event.recommendation }}</p>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Status</div>
+      <p class="alert-meta">Current status: <strong>{{ event.status }}</strong></p>
+      <form method="post" action="/alerts/{{ event.id }}/status" class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button name="status" value="new" class="{{ 'primary' if event.status == 'new' else '' }}">Mark new</button>
+        <button name="status" value="reviewed" class="{{ 'primary' if event.status == 'reviewed' else '' }}">Mark reviewed</button>
+        <button name="status" value="dismissed" class="{{ 'primary' if event.status == 'dismissed' else '' }}">Dismiss</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Source</div>
+      <p><a href="/sites/{{ site.slug }}">{{ site.name }}</a> &middot; {{ site.sector }}</p>
+      <p><a href="{{ page.url }}" target="_blank" rel="noopener">{{ page.url }} ↗</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

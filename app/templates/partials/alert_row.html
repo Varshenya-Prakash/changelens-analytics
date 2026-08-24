@@ -1,0 +1,15 @@
+{% macro alert_row(event, page, site) %}
+<a class="alert-row" href="/alerts/{{ event.id }}">
+  <div class="alert-row-top">
+    <span class="alert-org">{{ site.name }} <span class="pill">{{ site.sector }}</span></span>
+    <span class="{{ event.signal_level|signal_badge_class }}">{{ event.signal_level }} · {{ "%.0f"|format(event.signal_score) }}</span>
+  </div>
+  <div class="alert-meta">
+    {{ page.page_label }} &middot; {{ event.primary_category }}
+    {% if event.is_cosmetic %}<span class="badge-cosmetic">cosmetic</span>{% endif %}
+    &middot; {{ event.detected_at.strftime("%b %d, %Y %H:%M UTC") }}
+    &middot; status: {{ event.status }}
+  </div>
+  <div class="alert-summary">{{ event.diff_summary }}</div>
+</a>
+{% endmacro %}

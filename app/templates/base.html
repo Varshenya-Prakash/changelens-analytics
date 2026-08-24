@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ChangeLens Analytics{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <!-- Applied before paint to avoid a flash of the wrong theme on load. -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("changelens-theme");
+        if (saved) document.documentElement.setAttribute("data-theme", saved);
+      } catch (e) {}
+    })();
+  </script>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <div class="ambient-glow no-print" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
+
+  <div class="mobile-topbar no-print">
+    <div class="brand">
+      <span class="brand-mark">CL</span>
+      <span>ChangeLens Analytics</span>
+    </div>
+    <button class="mobile-menu-btn" type="button" onclick="document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').classList.add('visible');" aria-label="Open navigation menu">☰</button>
+  </div>
+  <div class="sidebar-overlay no-print" id="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open'); this.classList.remove('visible');"></div>
+  <div class="app-shell">
+    <aside class="sidebar no-print" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">CL</span>
+        <span>
+          ChangeLens Analytics
+          <span class="brand-sub">Data analytics portfolio project</span>
+        </span>
+      </div>
+      <ul class="nav-list">
+        <li><a href="/" class="{{ 'active' if active_nav == 'overview' else '' }}">Overview</a></li>
+        <li><a href="/alerts" class="{{ 'active' if active_nav == 'alerts' else '' }}">Alert Feed</a></li>
+        <li><a href="/settings/sites" class="{{ 'active' if active_nav == 'settings' else '' }}">Site Management</a></li>
+        <li><a href="/action-plan" class="{{ 'active' if active_nav == 'action-plan' else '' }}">Methodology</a></li>
+        <li><a href="/docs" target="_blank">API Docs ↗</a></li>
+      </ul>
+
+      <div class="theme-switch no-print" role="group" aria-label="Theme">
+        <button type="button" class="theme-btn" data-theme-choice="light" title="Light">☀️</button>
+        <button type="button" class="theme-btn" data-theme-choice="dark" title="Dark">🌙</button>
+        <button type="button" class="theme-btn" data-theme-choice="ambient" title="Ambient">✨</button>
+      </div>
+
+      <div class="sidebar-footer">
+        Independent data analytics portfolio project.
+        {% if settings.enable_live_monitoring %}
+          <br><span style="color:var(--color-high);font-weight:700;">Live monitoring: ON</span>
+        {% else %}
+          <br><span style="color:var(--color-low);font-weight:700;">Live monitoring: OFF (demo data)</span>
+        {% endif %}
+      </div>
+    </aside>
+    <main class="main">
+      {% block content %}{% endblock %}
+      <footer class="app-footer no-print">
+        ChangeLens Analytics — a data analytics portfolio project demonstrating an end-to-end ingestion, classification, scoring, and visualization pipeline.
+      </footer>
+    </main>
+  </div>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/cursor.js"></script>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

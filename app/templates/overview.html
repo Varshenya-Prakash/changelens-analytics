@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% from "partials/alert_row.html" import alert_row %}
+{% block title %}Overview — ChangeLens Analytics{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Overview</h1>
+    <p class="subtitle">Change intelligence across {{ organizations|length }} tracked organizations, last {{ filters.days }} days.</p>
+  </div>
+</div>
+
+<form class="filter-bar no-print" method="get" action="/">
+  <div class="field">
+    <label for="days">Date range (days)</label>
+    <select name="days" id="days" onchange="this.form.submit()">
+      {% for d in [7, 30, 90, 180, 365] %}
+        <option value="{{ d }}" {{ "selected" if filters.days == d else "" }}>{{ d }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="organization">Organization</label>
+    <select name="organization" id="organization" onchange="this.form.submit()">
+      <option value="">All</option>
+      {% for org in organizations %}
+        <option value="{{ org }}" {{ "selected" if filters.organization == org else "" }}>{{ org }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="sector">Sector</label>
+    <select name="sector" id="sector" onchange="this.form.submit()">
+      <option value="">All</option>
+      {% for s in sectors %}
+        <option value="{{ s }}" {{ "selected" if filters.sector == s else "" }}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="category">Category</label>
+    <select name="category" id="category" onchange="this.form.submit()">
+      <option value="">All</option>
+      {% for c in categories %}
+        <option value="{{ c }}" {{ "selected" if filters.category == c else "" }}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="signal_level">Signal level</label>
+    <select name="signal_level" id="signal_level" onchange="this.form.submit()">
+      <option value="">All</option>
+      {% for lvl in signal_levels %}
+        <option value="{{ lvl }}" {{ "selected" if filters.signal_level == lvl else "" }}>{{ lvl }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <a class="btn" href="/">Reset</a>
+</form>
+
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-label">Changes ({{ filters.days }}d)</div>
+    <div class="kpi-value">{{ summary.changes_last_30_days }}</div>
+    <div class="kpi-sub">Total detected change events</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">High-signal changes</div>
+    <div class="kpi-value">{{ summary.high_signal_changes }}</div>
+    <div class="kpi-sub">Signal level: high or critical</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Signal-to-noise ratio</div>
+    <div class="kpi-value">{{ summary.signal_to_noise_ratio }}</div>
+    <div class="kpi-sub">Meaningful changes per noise event</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Most active organization</div>
+    <div class="kpi-value" style="font-size:19px;">{{ summary.most_active_organization or "—" }}</div>
+    <div class="kpi-sub">By change volume this period</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="section-title">Change frequency over time</div>
+    {% if daily_trend %}
+      <div class="chart-wrap"><canvas id="dailyTrendChart"></canvas></div>
+    {% else %}
+      <div class="empty-state"><h3>No data yet</h3><p>Run the monitoring pipeline or seed demo data to populate this chart.</p></div>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div class="section-title">Most active organizations</div>
+    {% if leaderboard %}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Organization</th><th>Changes</th><th>Avg signal</th></tr></thead>
+        <tbody>
+          {% for row in leaderboard %}
+          <tr>
+            <td><a href="/sites/{{ row.slug }}">{{ row.name }}</a><br><span class="pill">{{ row.sector }}</span></td>
+            <td>{{ row.change_count }}</td>
+            <td>{{ row.avg_signal_score }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div class="empty-state"><p>No activity yet.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="section-title">Category breakdown over time</div>
+    {% if category_trend %}
+      <div class="chart-wrap"><canvas id="categoryTrendChart"></canvas></div>
+    {% else %}
+      <div class="empty-state"><p>No category data yet.</p></div>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div class="section-title">Signal vs. noise trend</div>
+    {% if signal_trend %}
+      <div class="chart-wrap"><canvas id="signalTrendChart"></canvas></div>
+    {% else %}
+      <div class="empty-state"><p>No signal data yet.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="section-title">Category share ({{ filters.days }}d)</div>
+    {% if category_totals %}
+      <div class="chart-wrap"><canvas id="categoryDonutChart"></canvas></div>
+    {% else %}
+      <div class="empty-state"><p>No category data yet.</p></div>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div class="section-title">Change magnitude vs. signal score</div>
+    <p style="font-size:12.5px;color:var(--color-text-muted);margin:-6px 0 10px;">
+      Each point is one detected change. Bottom-right = big rewrite, low relevance (likely cosmetic).
+      Top-left = small but pointed edit, high relevance (e.g. a pricing-line change).
+    </p>
+    {% if scatter_data %}
+      <div class="chart-wrap"><canvas id="magnitudeScoreScatter"></canvas></div>
+    {% else %}
+      <div class="empty-state"><p>No events yet.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title">Recent high-priority alerts</div>
+  {% if recent_alerts %}
+    {% for event, page, site in recent_alerts %}
+      {{ alert_row(event, page, site) }}
+    {% endfor %}
+    <a href="/alerts?signal_level=high" class="btn">View full alert feed →</a>
+  {% else %}
+    <div class="empty-state"><h3>No high-priority alerts</h3><p>Nothing above the "high" signal threshold in this period — that's a healthy sign.</p></div>
+  {% endif %}
+</div>
+
+<script id="chart-data"
+  data-daily='{{ daily_trend|tojson }}'
+  data-category='{{ category_trend|tojson }}'
+  data-signal='{{ signal_trend|tojson }}'
+  data-category-totals='{{ category_totals|tojson }}'
+  data-scatter='{{ scatter_data|tojson }}'></script>
+<script src="/static/js/overview_charts.js"></script>
+{% endblock %}

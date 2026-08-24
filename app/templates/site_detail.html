@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% from "partials/alert_row.html" import alert_row %}
+{% block title %}{{ site.name }} — ChangeLens Analytics{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/">← Overview</a></div>
+<div class="page-header">
+  <div>
+    <h1>{{ site.name }}</h1>
+    <p class="subtitle">{{ site.sector }} &middot; <a href="{{ site.base_url }}" target="_blank" rel="noopener">{{ site.base_url }} ↗</a></p>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-label">Changes (90d)</div>
+    <div class="kpi-value">{{ total_changes_90d }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Avg signal score</div>
+    <div class="kpi-value">{{ avg_score }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Tracked pages</div>
+    <div class="kpi-value">{{ site.tracked_pages|length }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Status</div>
+    <div class="kpi-value" style="font-size:18px;">{{ "Active" if site.is_active else "Paused" }}</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="section-title">Activity trend (90d)</div>
+    {% if trend %}
+      <div class="chart-wrap small"><canvas id="siteTrendChart"></canvas></div>
+    {% else %}
+      <div class="empty-state"><p>No recent activity.</p></div>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div class="section-title">Category distribution</div>
+    {% if category_counts %}
+      <div class="chart-wrap small"><canvas id="siteCategoryDonut"></canvas></div>
+      <div class="table-wrap" style="margin-top:10px;">
+<table>
+        <thead><tr><th>Category</th><th>Count</th></tr></thead>
+        <tbody>
+          {% for cat, count in category_counts %}
+          <tr><td>{{ cat }}</td><td>{{ count }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+</div>
+    {% else %}
+      <div class="empty-state"><p>No categorized changes yet.</p></div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title">Tracked pages</div>
+  <div class="table-wrap">
+<table>
+    <thead><tr><th>Label</th><th>URL</th><th>Method</th><th>Interval</th><th>Last checked</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for tp in site.tracked_pages %}
+      <tr>
+        <td>{{ tp.page_label }}</td>
+        <td><a href="{{ tp.url }}" target="_blank" rel="noopener">{{ tp.url }}</a></td>
+        <td>{{ tp.crawl_method }}</td>
+        <td>{{ tp.crawl_interval_minutes }} min</td>
+        <td>{{ tp.last_checked_at.strftime("%b %d, %Y %H:%M") if tp.last_checked_at else "never" }}</td>
+        <td>{{ "Active" if tp.is_active else "Paused" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</div>
+
+<div class="card">
+  <div class="section-title">Recent changes</div>
+  {% if recent_events %}
+    {% for event in recent_events %}
+      {{ alert_row(event, event.tracked_page, site) }}
+    {% endfor %}
+  {% else %}
+    <div class="empty-state"><p>No changes recorded yet for this organization.</p></div>
+  {% endif %}
+</div>
+
+<script id="site-chart-data"
+  data-trend='{{ trend|tojson }}'
+  data-categories='{{ category_counts|tojson }}'></script>
+<script src="/static/js/site_chart.js"></script>
+{% endblock %}

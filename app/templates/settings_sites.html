@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Site Management — ChangeLens Analytics{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Site Management</h1>
+    <p class="subtitle">Editable demonstration targets. Live scraping is {{ "ENABLED" if live_monitoring_enabled else "disabled" }} in this environment.</p>
+  </div>
+  <form method="post" action="/monitor/run" class="no-print">
+    <button class="primary" type="submit">Run monitoring pass now</button>
+  </form>
+</div>
+
+{% if not live_monitoring_enabled %}
+<div class="card" style="border-color:#c9d6ff;background:var(--color-accent-light);">
+  <strong>Demo mode:</strong> live monitoring is off, so "check now" and manual runs will record a no-op fetch rather than hitting real websites.
+  Set <code>ENABLE_LIVE_MONITORING=true</code> in <code>.env</code> to enable live scraping locally.
+</div>
+{% endif %}
+
+{% for site in sites %}
+<div class="card">
+  <div class="section-title">
+    <a href="/sites/{{ site.slug }}">{{ site.name }}</a>
+    <span class="pill">{{ site.sector }}</span>
+    {% if not site.is_active %}<span class="pill">paused</span>{% endif %}
+  </div>
+  <div class="table-wrap">
+<table>
+    <thead><tr><th>Label</th><th>URL</th><th>Method</th><th>Interval (min)</th><th>Status</th><th class="no-print">Actions</th></tr></thead>
+    <tbody>
+      {% for tp in site.tracked_pages %}
+      <tr>
+        <td>{{ tp.page_label }}</td>
+        <td><a href="{{ tp.url }}" target="_blank" rel="noopener">{{ tp.url }}</a></td>
+        <td>{{ tp.crawl_method }}</td>
+        <td>{{ tp.crawl_interval_minutes }}</td>
+        <td>{{ "Active" if tp.is_active else "Paused" }}</td>
+        <td class="no-print" style="display:flex;gap:6px;">
+          <form method="post" action="/settings/sites/{{ site.id }}/pages/{{ tp.id }}/toggle">
+            <button type="submit">{{ "Disable" if tp.is_active else "Enable" }}</button>
+          </form>
+          <form method="post" action="/settings/sites/{{ site.id }}/pages/{{ tp.id }}/check-now">
+            <button type="submit">Check now</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+  <details class="no-print" style="margin-top:10px;">
+    <summary style="cursor:pointer;font-weight:600;font-size:13.5px;">+ Add tracked page</summary>
+    <form method="post" action="/settings/sites/{{ site.id }}/pages" class="filter-bar" style="margin-top:10px;">
+      <div class="field"><label>URL</label><input type="url" name="url" required></div>
+      <div class="field"><label>Page label</label><input type="text" name="page_label" required></div>
+      <div class="field">
+        <label>Crawl method</label>
+        <select name="crawl_method"><option value="http">http</option><option value="playwright">playwright</option></select>
+      </div>
+      <div class="field"><label>Interval (min)</label><input type="number" name="crawl_interval_minutes" value="720"></div>
+      <button class="primary" type="submit">Add page</button>
+    </form>
+  </details>
+</div>
+{% endfor %}
+
+{% if not sites %}
+<div class="empty-state card"><h3>No organizations yet</h3><p>Run <code>python -m app.cli seed-demo-data</code> to populate demo targets.</p></div>
+{% endif %}
+{% endblock %}

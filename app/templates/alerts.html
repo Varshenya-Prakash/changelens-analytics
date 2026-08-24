@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "partials/alert_row.html" import alert_row %}
+{% block title %}Alert Feed — ChangeLens Analytics{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Alert Feed</h1>
+    <p class="subtitle">{{ total }} change events, sorted by signal score.</p>
+  </div>
+</div>
+
+<form class="filter-bar no-print" method="get" action="/alerts" id="alert-filter-form">
+  <div class="field">
+    <label for="search">Search</label>
+    <input type="search" id="search" name="search" placeholder="Company, URL, diff text..." value="{{ filters.search }}">
+  </div>
+  <div class="field">
+    <label for="site_id">Organization</label>
+    <select name="site_id" id="site_id" onchange="this.form.submit()">
+      <option value="">All</option>
+      {% for s in sites %}
+        <option value="{{ s.id }}" {{ "selected" if filters.site_id == s.id else "" }}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="category">Category</label>
+    <select name="category" id="category" onchange="this.form.submit()">
+      <option value="">All</option>
+      {% for c in categories %}
+        <option value="{{ c }}" {{ "selected" if filters.category == c else "" }}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="signal_level">Signal level</label>
+    <select name="signal_level" id="signal_level" onchange="this.form.submit()">
+      <option value="">All</option>
+      {% for lvl in signal_levels %}
+        <option value="{{ lvl }}" {{ "selected" if filters.signal_level == lvl else "" }}>{{ lvl }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="status">Status</label>
+    <select name="status" id="status" onchange="this.form.submit()">
+      <option value="">All</option>
+      {% for st in ["new", "reviewed", "dismissed"] %}
+        <option value="{{ st }}" {{ "selected" if filters.status == st else "" }}>{{ st }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button class="primary" type="submit">Filter</button>
+  <a class="btn" href="/alerts">Reset</a>
+</form>
+
+<div class="card" id="alert-results">
+  {% if rows %}
+    {% for event, page, site in rows %}
+      {{ alert_row(event, page, site) }}
+    {% endfor %}
+  {% else %}
+    <div class="empty-state"><h3>No alerts match these filters</h3><p>Try widening your date range or clearing a filter.</p></div>
+  {% endif %}
+</div>
+
+{% if total_pages > 1 %}
+<div class="no-print" style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+  {% for p in range(1, total_pages + 1) %}
+    <a class="btn {{ 'primary' if p == page else '' }}"
+       href="/alerts?page={{ p }}&category={{ filters.category }}&site_id={{ filters.site_id }}&signal_level={{ filters.signal_level }}&status={{ filters.status }}&search={{ filters.search }}">{{ p }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<script>
+  // Debounced auto-submit on search-as-you-type, so filtering feels live
+  // instead of requiring an explicit click for every keystroke pause.
+  (function () {
+    const search = document.getElementById("search");
+    const form = document.getElementById("alert-filter-form");
+    if (!search || !form) return;
+    let timer = null;
+    search.addEventListener("input", function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () { form.submit(); }, 500);
+    });
+  })();
+</script>
+{% endblock %}

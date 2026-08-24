@@ -1,0 +1,51 @@
+[project]
+name = "changelens-analytics"
+version = "0.1.0"
+description = "A full-stack data analytics platform: ingestion, diffing, classification, scoring, and visualization of change-event data."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "httpx>=0.27",
+    "beautifulsoup4>=4.12",
+    "jinja2>=3.1",
+    "apscheduler>=3.10",
+    "pandas>=2.2",
+    "python-multipart>=0.0.9",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+    "black>=24.0",
+]
+playwright = [
+    "playwright>=1.42",
+]
+
+[tool.setuptools]
+packages = ["app"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["alembic/versions", ".venv", "*.egg-info", "data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "B008"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

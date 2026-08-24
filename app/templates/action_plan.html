@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Methodology / Action Plan — ChangeLens Analytics{% endblock %}
+{% block content %}
+<div class="page-header no-print">
+  <div>
+    <h1>Methodology &amp; Analytics Framework</h1>
+    <p class="subtitle">Printable one-pager. Use your browser's Print → Save as PDF to export.</p>
+  </div>
+  <button class="primary" onclick="window.print()">Print / Export PDF</button>
+</div>
+
+<div class="card">
+  <h2>Define</h2>
+  <p>
+    <strong>Objective:</strong> convert raw website-change alerts into prioritized, evidence-backed competitive
+    intelligence. Change-alert tools can tell you <em>that</em> a page changed — this project adds the missing
+    analytical layer of <em>what</em> changed, <em>how often</em>, <em>whether it matters</em>, and
+    <em>what to do about it</em>.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Acquire / Synthesize</h2>
+  <p>
+    The pipeline monitors configured public pages on a schedule, captures timestamped HTML and cleaned-text snapshots,
+    and stores them in a relational model (sites → tracked pages → snapshots). Each new snapshot is diffed against
+    the prior one using normalized text comparison, producing similarity scores and added/removed text evidence.
+    Diffs are enriched with deterministic, keyword-based classification into business-relevant categories, and scored
+    0–100 for competitive signal strength using a transparent, configurable formula. Everything rolls up into
+    analytics tables that power trend charts, leaderboards, and the alert feed.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Action Plan</h2>
+  <p>
+    Add a categorized change digest, evidence-backed alert prioritization, and trend analytics so users can
+    distinguish strategic market moves from routine website noise. In practice this means: (1) a daily/weekly digest
+    grouping changes by category and organization, (2) a signal score with a visible explanation so users trust why
+    an alert is prioritized, and (3) trend views that surface which competitors are accelerating activity and in
+    which category — pricing, product, leadership, funding, or partnerships.
+  </p>
+  {% if category_totals %}
+  <p style="margin-top:14px;"><strong>Findings from current demo data (last 90 days):</strong></p>
+  <ul>
+    <li>{{ meaningful_pct }}% of detected changes were classified as meaningful (non-noise).</li>
+    <li>Dominant change category: <strong>{{ dominant_category }}</strong>.</li>
+    {% if leaderboard %}<li>Most active organization: <strong>{{ leaderboard[0].name }}</strong> ({{ leaderboard[0].change_count }} changes).</li>{% endif %}
+  </ul>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Partner</h2>
+  <p>
+    A data/analytics partner can help tune category taxonomies for a specific vertical, calibrate scoring weights
+    against real user feedback, build vertical-specific intelligence (e.g. healthcare regulatory signals, fintech
+    pricing signals), and design decision workflows that route high-signal alerts to the right team — sales, product,
+    or leadership — with the right context attached.
+  </p>
+</div>
+
+{% if category_totals %}
+<div class="card">
+  <h2>Category totals (90 days)</h2>
+  <div class="table-wrap">
+<table>
+    <thead><tr><th>Category</th><th>Count</th></tr></thead>
+    <tbody>
+      {% for row in category_totals %}
+      <tr><td>{{ row.category }}</td><td>{{ row.count }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</div>
+{% endif %}
+
+{% if high_signal_examples %}
+<div class="card">
+  <h2>Examples of high-signal changes</h2>
+  <div class="table-wrap">
+<table>
+    <thead><tr><th>Organization</th><th>Category</th><th>Score</th><th>Summary</th></tr></thead>
+    <tbody>
+      {% for event, page, site in high_signal_examples %}
+      <tr>
+        <td>{{ site.name }}</td>
+        <td>{{ event.primary_category }}</td>
+        <td>{{ "%.0f"|format(event.signal_score) }}</td>
+        <td>{{ event.diff_summary }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</div>
+{% endif %}
+
+<p class="print-only" style="margin-top:24px;font-size:12px;color:#666;">
+  Independent data analytics portfolio project.
+</p>
+{% endblock %}
