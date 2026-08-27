@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_db
+from app.core.auth import require_admin_auth
 from app.models import Site, TrackedPage
 from app.schemas.site import SiteDetailOut, SiteIn, SiteOut
 
@@ -31,7 +32,9 @@ def get_site(site_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/sites", response_model=SiteDetailOut, status_code=201)
-def create_site(payload: SiteIn, db: Session = Depends(get_db)):
+def create_site(
+    payload: SiteIn, db: Session = Depends(get_db), _user: str = Depends(require_admin_auth)
+):
     base_slug = slugify(payload.name)
     slug = base_slug
     suffix = 1

@@ -33,7 +33,7 @@ class Settings(BaseSettings):
 
     user_agent: str = (
         "ChangeLensBot/0.1 "
-        "(+https://github.com/yourname/site-tracker-analytics; portfolio project)"
+        "(+https://github.com/Varshenya-Prakash/changelens-analytics; portfolio project)"
     )
     request_timeout_seconds: float = 15.0
     request_max_retries: int = 2
@@ -49,6 +49,21 @@ class Settings(BaseSettings):
         r"accept cookies.*",
         r"\bcopyright\s?\d{4}\b",
     ]
+
+    # --- Site identity / SEO / contact ---
+    site_url: str = "https://changelens-analytics.onrender.com"
+    author_name: str = "Varshney P Choudhary"
+    author_email: str = "varshney49@gmail.com"
+    author_phone: str = "+91-8649729742"
+    author_linkedin: str = ""
+    author_github: str = ""
+
+    # --- Optional analytics (cookie-consent gated; unset = disabled) ---
+    ga_measurement_id: str = ""
+
+    # --- Basic auth for the write-side of Settings/admin actions ---
+    admin_username: str = "varshney_admin"
+    admin_password: str = "ChangeLens#2026!"
 
 
 @lru_cache

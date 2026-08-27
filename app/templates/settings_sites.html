@@ -1,5 +1,8 @@
 {% extends "base.html" %}
+{% from "partials/breadcrumbs.html" import breadcrumbs %}
 {% block title %}Site Management — ChangeLens Analytics{% endblock %}
+{% block meta_description %}Add, enable/disable, and manually check tracked pages for each monitored organization.{% endblock %}
+{% block breadcrumbs %}{{ breadcrumbs([{"label": "Site Management"}]) }}{% endblock %}
 {% block content %}
 <div class="page-header">
   <div>
@@ -67,6 +70,6 @@
 {% endfor %}
 
 {% if not sites %}
-<div class="empty-state card"><h3>No organizations yet</h3><p>Run <code>python -m app.cli seed-demo-data</code> to populate demo targets.</p></div>
+<div class="empty-state card"><span class="icon">📂</span><h3>No organizations yet</h3><p>Run <code>python -m app.cli seed-demo-data</code> to populate demo targets.</p></div>
 {% endif %}
 {% endblock %}

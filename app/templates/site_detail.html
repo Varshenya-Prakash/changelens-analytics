@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% from "partials/alert_row.html" import alert_row %}
-{% block title %}{{ site.name }} — ChangeLens Analytics{% endblock %}
+{% from "partials/breadcrumbs.html" import breadcrumbs %}
+{% block title %}{{ site.name }} — Change Activity | ChangeLens Analytics{% endblock %}
+{% block meta_description %}Activity trend, category distribution, and recent change events for {{ site.name }} ({{ site.sector }}).{% endblock %}
+{% block breadcrumbs %}{{ breadcrumbs([{"label": site.name}]) }}{% endblock %}
 {% block content %}
-<div class="breadcrumb"><a href="/">← Overview</a></div>
 <div class="page-header">
   <div>
     <h1>{{ site.name }}</h1>

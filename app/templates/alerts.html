@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% from "partials/alert_row.html" import alert_row %}
-{% block title %}Alert Feed — ChangeLens Analytics{% endblock %}
+{% from "partials/breadcrumbs.html" import breadcrumbs %}
+{% block title %}Alert Feed — ChangeLens Analytics | Change Events, Filtered & Scored{% endblock %}
+{% block meta_description %}Browse and filter every detected change event by category, organization, signal level, and status — with full-text search across diffs.{% endblock %}
+{% block breadcrumbs %}{{ breadcrumbs([{"label": "Alert Feed"}]) }}{% endblock %}
 {% block content %}
 <div class="page-header">
   <div>
@@ -60,7 +63,7 @@
       {{ alert_row(event, page, site) }}
     {% endfor %}
   {% else %}
-    <div class="empty-state"><h3>No alerts match these filters</h3><p>Try widening your date range or clearing a filter.</p></div>
+    <div class="empty-state"><span class="icon">🔍</span><h3>No alerts match these filters</h3><p>Try widening your date range or clearing a filter.</p></div>
   {% endif %}
 </div>
 

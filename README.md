@@ -112,8 +112,8 @@ All content is authored fixture copy — no live scraping is used to build the d
 ## Installation
 
 ```bash
-git clone <this-repo>
-cd site-tracker-analytics
+git clone https://github.com/Varshenya-Prakash/changelens-analytics.git
+cd changelens-analytics
 cp .env.example .env
 make install
 make migrate
@@ -143,7 +143,7 @@ To run against PostgreSQL instead of SQLite:
 ```bash
 docker compose --profile postgres up --build
 ```
-(set `DATABASE_URL` in `.env` to point at the `db` service, e.g. `postgresql+psycopg2://sitetracker:sitetracker@db:5432/sitetracker`)
+(set `DATABASE_URL` in `.env` to point at the `db` service, e.g. `postgresql+psycopg2://changelens:changelens@db:5432/changelens`)
 
 ## CLI commands
 

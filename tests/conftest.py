@@ -4,6 +4,8 @@ import os
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("ENABLE_LIVE_MONITORING", "false")
+os.environ.setdefault("ADMIN_USERNAME", "test_admin")
+os.environ.setdefault("ADMIN_PASSWORD", "test_password")
 
 import pytest
 from fastapi.testclient import TestClient

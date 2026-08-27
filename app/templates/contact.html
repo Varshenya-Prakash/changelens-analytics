@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "partials/breadcrumbs.html" import breadcrumbs %}
+{% block title %}Contact — ChangeLens Analytics{% endblock %}
+{% block meta_description %}Get in touch with {{ settings.author_name }}, the creator of ChangeLens Analytics.{% endblock %}
+{% block breadcrumbs %}{{ breadcrumbs([{"label": "Contact"}]) }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Contact</h1>
+    <p class="subtitle">I'd love to hear from you — reach out directly.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="contact-grid">
+    <a class="contact-item" href="mailto:{{ settings.author_email }}">
+      <span class="icon">✉️</span>
+      <div>
+        <div style="font-weight:700;">Email</div>
+        <div style="color:var(--color-text-muted); font-size:13px;">{{ settings.author_email }}</div>
+      </div>
+    </a>
+    <a class="contact-item" href="tel:{{ settings.author_phone|replace('-', '') }}">
+      <span class="icon">📞</span>
+      <div>
+        <div style="font-weight:700;">Phone</div>
+        <div style="color:var(--color-text-muted); font-size:13px;">{{ settings.author_phone }}</div>
+      </div>
+    </a>
+    {% if settings.author_linkedin %}
+    <a class="contact-item" href="{{ settings.author_linkedin }}" target="_blank" rel="noopener">
+      <span class="icon">💼</span>
+      <div>
+        <div style="font-weight:700;">LinkedIn</div>
+        <div style="color:var(--color-text-muted); font-size:13px;">View profile ↗</div>
+      </div>
+    </a>
+    {% endif %}
+    {% if settings.author_github %}
+    <a class="contact-item" href="{{ settings.author_github }}" target="_blank" rel="noopener">
+      <span class="icon">🐙</span>
+      <div>
+        <div style="font-weight:700;">GitHub</div>
+        <div style="color:var(--color-text-muted); font-size:13px;">View profile ↗</div>
+      </div>
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <p style="color:var(--color-text-muted); font-size:13px; margin:0;">
+    Note: this page links directly to email and phone rather than using a contact form, since this
+    static portfolio deployment has no backend email service configured — clicking through opens your
+    own mail/phone app, so messages reach me reliably.
+  </p>
+</div>
+{% endblock %}

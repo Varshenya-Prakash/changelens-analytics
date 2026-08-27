@@ -10,11 +10,12 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, Form, Query, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_db
+from app.core.auth import require_admin_auth
 from app.core.config import get_settings
 from app.models import ChangeEvent, ChangeEventCategory, Site, TrackedPage
 from app.pages.templating import templates
@@ -269,7 +270,9 @@ def site_detail(request: Request, slug: str, db: Session = Depends(get_db)):
 
 
 @pages_router.get("/settings/sites")
-def settings_sites(request: Request, db: Session = Depends(get_db)):
+def settings_sites(
+    request: Request, db: Session = Depends(get_db), _user: str = Depends(require_admin_auth)
+):
     sites = db.query(Site).options(joinedload(Site.tracked_pages)).order_by(Site.name).all()
     settings = get_settings()
     return templates.TemplateResponse(
@@ -279,34 +282,63 @@ def settings_sites(request: Request, db: Session = Depends(get_db)):
             "active_nav": "settings",
             "sites": sites,
             "live_monitoring_enabled": settings.enable_live_monitoring,
+            "message": request.query_params.get("message"),
+            "message_type": request.query_params.get("message_type", "success"),
         },
     )
 
 
 @pages_router.post("/settings/sites/{site_id}/pages/{page_id}/toggle")
-def toggle_page_active(site_id: int, page_id: int, db: Session = Depends(get_db)):
+def toggle_page_active(
+    site_id: int,
+    page_id: int,
+    db: Session = Depends(get_db),
+    _user: str = Depends(require_admin_auth),
+):
     tp = (
         db.query(TrackedPage)
         .filter(TrackedPage.id == page_id, TrackedPage.site_id == site_id)
         .first()
     )
-    if tp is not None:
-        tp.is_active = not tp.is_active
-        db.commit()
-    return RedirectResponse(url="/settings/sites", status_code=303)
+    if tp is None:
+        return RedirectResponse(
+            url="/settings/sites?message=Tracked+page+not+found&message_type=error", status_code=303
+        )
+    tp.is_active = not tp.is_active
+    db.commit()
+    state = "enabled" if tp.is_active else "disabled"
+    return RedirectResponse(
+        url=f"/settings/sites?message=Page+{state}+successfully&message_type=success",
+        status_code=303,
+    )
 
 
 @pages_router.post("/settings/sites/{site_id}/pages/{page_id}/check-now")
-def check_page_now(site_id: int, page_id: int, db: Session = Depends(get_db)):
+def check_page_now(
+    site_id: int,
+    page_id: int,
+    db: Session = Depends(get_db),
+    _user: str = Depends(require_admin_auth),
+):
     tp = (
         db.query(TrackedPage)
         .filter(TrackedPage.id == page_id, TrackedPage.site_id == site_id)
         .first()
     )
-    if tp is not None:
-        check_page(db, tp)
-        db.commit()
-    return RedirectResponse(url="/settings/sites", status_code=303)
+    if tp is None:
+        return RedirectResponse(
+            url="/settings/sites?message=Tracked+page+not+found&message_type=error", status_code=303
+        )
+    _snapshot, _event, error = check_page(db, tp)
+    db.commit()
+    if error:
+        return RedirectResponse(
+            url=f"/settings/sites?message=Check+failed:+{error}&message_type=error", status_code=303
+        )
+    return RedirectResponse(
+        url="/settings/sites?message=Check+completed+successfully&message_type=success",
+        status_code=303,
+    )
 
 
 @pages_router.post("/settings/sites/{site_id}/pages")
@@ -317,27 +349,47 @@ def add_tracked_page(
     crawl_method: str = Form("http"),
     crawl_interval_minutes: int = Form(720),
     db: Session = Depends(get_db),
+    _user: str = Depends(require_admin_auth),
 ):
     site = db.query(Site).filter(Site.id == site_id).first()
-    if site is not None:
-        db.add(
-            TrackedPage(
-                site_id=site.id,
-                url=url,
-                page_label=page_label,
-                crawl_method=crawl_method,
-                crawl_interval_minutes=crawl_interval_minutes,
-                is_active=True,
-            )
+    if site is None:
+        return RedirectResponse(
+            url="/settings/sites?message=Organization+not+found&message_type=error", status_code=303
         )
-        db.commit()
-    return RedirectResponse(url="/settings/sites", status_code=303)
+    if not url.startswith(("http://", "https://")):
+        return RedirectResponse(
+            url="/settings/sites?message=URL+must+start+with+http://+or+https://&message_type=error",
+            status_code=303,
+        )
+    db.add(
+        TrackedPage(
+            site_id=site.id,
+            url=url,
+            page_label=page_label,
+            crawl_method=crawl_method,
+            crawl_interval_minutes=crawl_interval_minutes,
+            is_active=True,
+        )
+    )
+    db.commit()
+    return RedirectResponse(
+        url="/settings/sites?message=Tracked+page+added+successfully&message_type=success",
+        status_code=303,
+    )
 
 
 @pages_router.post("/monitor/run")
-def trigger_monitor_run_page(db: Session = Depends(get_db)):
-    run_monitoring(db)
-    return RedirectResponse(url="/settings/sites", status_code=303)
+def trigger_monitor_run_page(
+    db: Session = Depends(get_db), _user: str = Depends(require_admin_auth)
+):
+    run = run_monitoring(db)
+    return RedirectResponse(
+        url=(
+            f"/settings/sites?message=Monitoring+run+completed:+{run.pages_succeeded}"
+            f"+succeeded,+{run.pages_failed}+failed&message_type=success"
+        ),
+        status_code=303,
+    )
 
 
 @pages_router.get("/action-plan")
@@ -368,3 +420,43 @@ def action_plan(request: Request, db: Session = Depends(get_db)):
             "dominant_category": dominant_category,
         },
     )
+
+
+@pages_router.get("/faq")
+def faq(request: Request):
+    return templates.TemplateResponse(request, "faq.html", {"active_nav": "faq"})
+
+
+@pages_router.get("/about")
+def about(request: Request):
+    return templates.TemplateResponse(request, "about.html", {"active_nav": "about"})
+
+
+@pages_router.get("/contact")
+def contact(request: Request):
+    return templates.TemplateResponse(request, "contact.html", {"active_nav": "contact"})
+
+
+@pages_router.get("/robots.txt")
+def robots_txt():
+    settings = get_settings()
+    content = f"User-agent: *\nAllow: /\nDisallow: /settings/\n\nSitemap: {settings.site_url}/sitemap.xml\n"
+    return Response(content=content, media_type="text/plain")
+
+
+@pages_router.get("/sitemap.xml")
+def sitemap_xml(db: Session = Depends(get_db)):
+    settings = get_settings()
+    static_paths = [
+        "/",
+        "/alerts",
+        "/action-plan",
+        "/faq",
+        "/about",
+        "/contact",
+    ]
+    site_slugs = [row[0] for row in db.query(Site.slug).all()]
+    urls = static_paths + [f"/sites/{slug}" for slug in site_slugs]
+    body = "\n".join(f"  <url><loc>{settings.site_url}{path}</loc></url>" for path in urls)
+    xml = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{body}\n</urlset>\n'
+    return Response(content=xml, media_type="application/xml")

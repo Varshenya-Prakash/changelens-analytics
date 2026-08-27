@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "partials/breadcrumbs.html" import breadcrumbs %}
+{% block title %}About — ChangeLens Analytics{% endblock %}
+{% block meta_description %}About {{ settings.author_name }} and the ChangeLens Analytics project — a data analytics portfolio piece demonstrating an end-to-end pipeline.{% endblock %}
+{% block breadcrumbs %}{{ breadcrumbs([{"label": "About"}]) }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>About</h1>
+    <p class="subtitle">About the project, and about me.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-title">About this project</div>
+  <p>
+    ChangeLens Analytics is a self-built data analytics portfolio project. It's a complete, working
+    pipeline — not a mockup — covering data ingestion, cleaning and normalization, feature engineering
+    (diffing), rule-based classification, a transparent scoring model, and an interactive multi-chart
+    dashboard with filtering, search, and drill-down. The goal was to demonstrate the full analyst
+    toolkit end-to-end on a problem that's genuinely useful: telling signal from noise in a stream of
+    change events.
+  </p>
+  <p>
+    Read more about the design decisions on the <a href="/action-plan">Methodology page</a>, or see
+    common questions on the <a href="/faq">FAQ</a>.
+  </p>
+</div>
+
+<div class="card">
+  <div class="section-title">What this project demonstrates</div>
+  <ul style="margin:0; padding-left:20px; color:var(--color-text-muted); font-size:13.5px; line-height:1.8;">
+    <li>End-to-end pipeline design: ingestion → cleaning → feature engineering → classification → scoring → visualization</li>
+    <li>Relational data modeling (SQLAlchemy + Alembic migrations) for a non-trivial domain</li>
+    <li>Building an explainable, auditable scoring model instead of reaching for a black-box one</li>
+    <li>A full test suite (unit + API-level) and CI, not just a working demo</li>
+    <li>A polished, accessible, responsive frontend built without a JS framework</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="section-title">About me</div>
+  <p><strong>{{ settings.author_name }}</strong></p>
+  <p style="color:var(--color-text-muted);">
+    I built this project to demonstrate practical, end-to-end data analytics skills — from raw data
+    collection through to a decision-ready dashboard. I'm looking for data analyst / data engineering
+    roles where I can apply this kind of full-pipeline thinking to real business problems.
+  </p>
+  <p><a href="/contact" class="btn primary">Get in touch →</a></p>
+</div>
+{% endblock %}

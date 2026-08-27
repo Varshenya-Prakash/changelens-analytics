@@ -1,5 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Methodology / Action Plan — ChangeLens Analytics{% endblock %}
+{% from "partials/breadcrumbs.html" import breadcrumbs %}
+{% block title %}Methodology & Analytics Framework — ChangeLens Analytics{% endblock %}
+{% block meta_description %}The Define → Acquire/Synthesize → Action Plan → Partner framework behind ChangeLens Analytics, plus live findings from the current demo dataset.{% endblock %}
+{% block breadcrumbs %}{{ breadcrumbs([{"label": "Methodology"}]) }}{% endblock %}
 {% block content %}
 <div class="page-header no-print">
   <div>

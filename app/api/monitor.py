@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
+from app.core.auth import require_admin_auth
 from app.models import TrackedPage
 from app.services.monitoring import check_page, run_monitoring
 
@@ -28,7 +29,9 @@ class PageMonitorOut(BaseModel):
 
 
 @router.post("/pages/{page_id}/monitor", response_model=PageMonitorOut)
-def monitor_single_page(page_id: int, db: Session = Depends(get_db)):
+def monitor_single_page(
+    page_id: int, db: Session = Depends(get_db), _user: str = Depends(require_admin_auth)
+):
     page = db.query(TrackedPage).filter(TrackedPage.id == page_id).first()
     if page is None:
         raise HTTPException(status_code=404, detail=f"Tracked page {page_id} not found")
@@ -43,7 +46,11 @@ def monitor_single_page(page_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/monitor/run", response_model=MonitorRunOut)
-def trigger_monitor_run(page_id: int | None = None, db: Session = Depends(get_db)):
+def trigger_monitor_run(
+    page_id: int | None = None,
+    db: Session = Depends(get_db),
+    _user: str = Depends(require_admin_auth),
+):
     run = run_monitoring(db, page_id=page_id)
     return MonitorRunOut(
         id=run.id,

@@ -1,9 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Not found — ChangeLens Analytics{% endblock %}
+{% block title %}Page Not Found (404) — ChangeLens Analytics{% endblock %}
+{% block meta_description %}The page you're looking for doesn't exist or may have moved.{% endblock %}
 {% block content %}
-<div class="error-state card">
-  <h3>Not found</h3>
-  <p>{{ message }}</p>
-  <a href="/" class="btn primary">Back to overview</a>
+<div class="error-state card" style="text-align:center; padding:60px 20px;">
+  <span class="icon" style="font-size:48px;">🔍</span>
+  <h3 style="font-size:22px;">Page not found</h3>
+  <p style="color:var(--color-text-muted); max-width:420px; margin:0 auto 20px;">{{ message or "The page you're looking for doesn't exist or may have moved." }}</p>
+  <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+    <a href="/" class="btn primary">Back to Overview</a>
+    <a href="/alerts" class="btn">Browse Alerts</a>
+    <a href="/contact" class="btn">Report a broken link</a>
+  </div>
 </div>
 {% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "partials/breadcrumbs.html" import breadcrumbs %}
+{% block title %}FAQ — ChangeLens Analytics{% endblock %}
+{% block meta_description %}Answers to common questions about how ChangeLens Analytics works: data sources, the scoring model, classification, and tech stack.{% endblock %}
+{% block breadcrumbs %}{{ breadcrumbs([{"label": "FAQ"}]) }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Frequently Asked Questions</h1>
+    <p class="subtitle">About the project, the data, and how it works.</p>
+  </div>
+</div>
+
+<div class="card">
+  <details class="faq-item" open>
+    <summary class="faq-question">Is this monitoring real websites right now?</summary>
+    <p class="faq-answer">
+      No. Live web scraping is disabled by default (<code>ENABLE_LIVE_MONITORING=false</code>) and the
+      dashboard runs entirely on deterministic, synthetic demo data — 8 fictional organizations, ~130
+      snapshots, and 100+ generated change events across a 90-day window. The fetch/monitoring code path
+      is fully implemented and unit-tested, but it's intentionally opt-in for anyone running this locally.
+    </p>
+  </details>
+
+  <details class="faq-item">
+    <summary class="faq-question">How is the "signal score" calculated?</summary>
+    <p class="faq-answer">
+      It's a transparent, rule-based formula — not a black-box model: a base score from how much of a
+      page's text changed, plus a category-relevance weight (pricing/funding changes score higher than
+      cosmetic ones), minus a penalty if the change looks cosmetic. Every alert shows its full scoring
+      breakdown on its detail page. Weights live in <code>app/services/scoring.py</code> and are easy to
+      tune.
+    </p>
+  </details>
+
+  <details class="faq-item">
+    <summary class="faq-question">How does the classification into categories work?</summary>
+    <p class="faq-answer">
+      Deterministic keyword/regex matching against the added and removed text, scored by match density
+      across 11 categories (pricing, product launches, hiring, leadership, funding, partnerships, PR,
+      regulatory, customer stories, cosmetic/noise, other). It's intentionally simple and auditable rather
+      than an opaque ML classifier — every match is traceable to the exact keywords that triggered it.
+    </p>
+  </details>
+
+  <details class="faq-item">
+    <summary class="faq-question">What's the tech stack?</summary>
+    <p class="faq-answer">
+      Python 3.12, FastAPI, SQLAlchemy 2.x + Alembic migrations, SQLite (Postgres-ready), httpx +
+      BeautifulSoup4 for fetching/parsing, Jinja2 + Chart.js for the dashboard, pytest for testing, and
+      Ruff/Black for linting. Full details and architecture diagrams are on the
+      <a href="https://github.com/Varshenya-Prakash/changelens-analytics" target="_blank" rel="noopener">GitHub repo</a>.
+    </p>
+  </details>
+
+  <details class="faq-item">
+    <summary class="faq-question">Can I run this myself or extend it?</summary>
+    <p class="faq-answer">
+      Yes — it's fully open source. Clone the repo, copy <code>.env.example</code> to <code>.env</code>,
+      and run <code>make install && make migrate && make seed && make run</code>. See the
+      <a href="/action-plan">Methodology</a> page for the design framework, or the README for full setup
+      instructions, tests, and Docker deployment.
+    </p>
+  </details>
+</div>
+{% endblock %}

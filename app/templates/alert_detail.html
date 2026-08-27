@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Alert #{{ event.id }} — ChangeLens Analytics{% endblock %}
+{% from "partials/breadcrumbs.html" import breadcrumbs %}
+{% block title %}{{ site.name }} — {{ event.primary_category }} Change #{{ event.id }} | ChangeLens Analytics{% endblock %}
+{% block meta_description %}Evidence-backed detail for a {{ event.signal_level }}-signal {{ event.primary_category }} change on {{ site.name }}: added/removed text, classification confidence, and full scoring breakdown.{% endblock %}
+{% block breadcrumbs %}{{ breadcrumbs([{"label": "Alert Feed", "url": "/alerts"}, {"label": "Alert #" ~ event.id}]) }}{% endblock %}
 {% block content %}
-<div class="breadcrumb"><a href="/alerts">← Alert Feed</a></div>
-
 <div class="page-header">
   <div>
     <h1>{{ site.name }} — {{ page.page_label }}</h1>
@@ -87,6 +88,8 @@
       <div class="section-title">Source</div>
       <p><a href="/sites/{{ site.slug }}">{{ site.name }}</a> &middot; {{ site.sector }}</p>
       <p><a href="{{ page.url }}" target="_blank" rel="noopener">{{ page.url }} ↗</a></p>
+      <p><a href="/alerts?site_id={{ site.id }}">View all alerts from {{ site.name }} →</a></p>
+      <p><a href="/alerts?category={{ event.primary_category|urlencode }}">View all "{{ event.primary_category }}" alerts →</a></p>
     </div>
   </div>
 </div>

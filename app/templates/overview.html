@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 {% from "partials/alert_row.html" import alert_row %}
-{% block title %}Overview — ChangeLens Analytics{% endblock %}
+{% block title %}Overview — ChangeLens Analytics | Data Analytics Portfolio Project{% endblock %}
+{% block meta_description %}An interactive analytics dashboard demonstrating an end-to-end data pipeline: change detection, classification, transparent signal scoring, and trend visualization across 8 demo organizations.{% endblock %}
 {% block content %}
 <div class="page-header">
   <div>
     <h1>Overview</h1>
     <p class="subtitle">Change intelligence across {{ organizations|length }} tracked organizations, last {{ filters.days }} days.</p>
   </div>
+</div>
+
+<div class="card no-print" style="display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; background:var(--color-accent-light); border-color:var(--color-accent);">
+  <div>
+    <strong>New here?</strong>
+    <span style="color:var(--color-text-muted);"> This is a portfolio project demonstrating a full analytics pipeline — see the methodology and design decisions behind it.</span>
+  </div>
+  <a href="/action-plan" class="btn primary" style="white-space:nowrap;">Read the methodology →</a>
 </div>
 
 <form class="filter-bar no-print" method="get" action="/">

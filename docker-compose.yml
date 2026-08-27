@@ -9,11 +9,20 @@ services:
       DATABASE_URL: ${DATABASE_URL:-sqlite:////app/data/sitetracker.db}
       ENABLE_LIVE_MONITORING: ${ENABLE_LIVE_MONITORING:-false}
       ENABLE_SCHEDULER: ${ENABLE_SCHEDULER:-false}
-      USER_AGENT: ${USER_AGENT:-ChangeLensBot/0.1 (+https://github.com/yourname/site-tracker-analytics; portfolio project)}
+      USER_AGENT: ${USER_AGENT:-ChangeLensBot/0.1 (+https://github.com/Varshenya-Prakash/changelens-analytics; portfolio project)}
       APP_ENV: docker
       LOG_LEVEL: INFO
+      SITE_URL: ${SITE_URL:-http://localhost:8000}
+      AUTHOR_NAME: ${AUTHOR_NAME:-Varshney P Choudhary}
+      AUTHOR_EMAIL: ${AUTHOR_EMAIL:-varshney49@gmail.com}
+      AUTHOR_PHONE: ${AUTHOR_PHONE:-+91-8649729742}
+      AUTHOR_LINKEDIN: ${AUTHOR_LINKEDIN:-}
+      AUTHOR_GITHUB: ${AUTHOR_GITHUB:-}
+      GA_MEASUREMENT_ID: ${GA_MEASUREMENT_ID:-}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-varshney_admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-ChangeLens#2026!}
     volumes:
-      - sitetracker_data:/app/data
+      - changelens_data:/app/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
       interval: 15s
@@ -25,14 +34,14 @@ services:
     image: postgres:16-alpine
     profiles: ["postgres"]
     environment:
-      POSTGRES_USER: sitetracker
-      POSTGRES_PASSWORD: sitetracker
-      POSTGRES_DB: sitetracker
+      POSTGRES_USER: changelens
+      POSTGRES_PASSWORD: changelens
+      POSTGRES_DB: changelens
     ports:
       - "5432:5432"
     volumes:
-      - sitetracker_pg_data:/var/lib/postgresql/data
+      - changelens_pg_data:/var/lib/postgresql/data
 
 volumes:
-  sitetracker_data:
-  sitetracker_pg_data:
+  changelens_data:
+  changelens_pg_data:
